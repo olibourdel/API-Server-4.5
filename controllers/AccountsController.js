@@ -26,12 +26,8 @@ module.exports =
             let user = this.repository.findByField("Email", loginInfo.Email);
             if (user != null) {
                 if (user.Password == loginInfo.Password) {
-                    if (user.VerifyCode == 'verified') {
-                        let newToken = TokenManager.create(user);
-                        this.HttpContext.response.JSON(newToken);
-                    } else {
-                        this.HttpContext.response.unverifiedUser();
-                    }
+                    let newToken = TokenManager.create(user);
+                    this.HttpContext.response.JSON(newToken);
                 } else {
                     this.HttpContext.response.wrongPassword();
                 }
@@ -78,7 +74,7 @@ module.exports =
                         this.HttpContext.response.unprocessable();
                     }
                 } else {
-                    this.HttpContext.response.ok();
+                    this.HttpContext.response.unverifiedUser();
                 }
             } else {
                 this.HttpContext.response.unprocessable();
