@@ -23,6 +23,13 @@ body {
     grid-template-columns: 80px auto 60px;
     align-items: center;
 }
+.login-cmd{
+    position: absolute;
+    width: 120px;
+    right: 20px;
+    display: grid;
+    grid-template-columns: 60px 60px;
+}
 .outLinedText {
     font-size: 30px !important;
     font-family: Titan One !important;

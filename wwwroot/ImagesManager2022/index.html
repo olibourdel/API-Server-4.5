@@ -60,6 +60,12 @@
                     <span class="cmd fa fa-plus-square" id="newImageCmd" title="Ajouter un image"
                         data-toggle="tooltip"></span>
                 </div>
+                <div class="login-cmd">
+                    <span class="cmd fa fa-sign-in" id="loginCmd" title="Se connecter"
+                    data-toggle="tooltip"></span>
+                    <span class="cmd fa fa-user-plus" id="signupCmd" title="S'enregistrer"
+                    data-toggle="tooltip"></span>
+                </div>
             </div>
 
             <div class="scrollContainer">
@@ -93,6 +99,17 @@
                 <div id="errorDlg">
                     <span id="errorMessage"></span>
                 </div>
+                <div id="loginDlg">
+                    <form id="loginForm">
+                        <label for="email_input">Email</label>
+                        <input type="text" id="email_input" class="form-control" required>
+
+                        <label for="password_input">Mot de passe</label>
+                        <input type="password" id="password_input" class="form-control" required>
+
+                        <span id="loginErrorMsg" style="color: red;"></span>
+                    </form>
+                </div>
             </div>
         </div>
         <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
@@ -100,6 +117,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
         <script src="js/customValidation.js"></script>
         <script src="js/imageUploader.js"></script>
+        <script src="js/accountApi.js"></script>
         <script src="js/api.js"></script>
         <script src="js/date.js"></script>
         <script defer>
@@ -289,7 +307,52 @@
                 $("#description_input").val(image.Description);
                 ImageUploader.setImage('image', image.OriginalURL);
             }
+            
+            //LOGIN
 
+            function openLogin() {
+                holdCheckETag = true;
+                resetloginform();
+                $("#loginDlg").dialog('open');
+            }
+
+            function loginSuccess(){
+
+            }
+            
+            function loginErrorHandler(errorCode){
+                switch(errorCode){
+                    case 480: //unverified 
+                        $("#loginErrorMsg").text("Unverified user")
+                        break;
+                    case 481: //user not found
+                        $("#loginErrorMsg").text("No user with the following email")
+                        break;
+                    case 482: //wrong password
+                        $("#loginErrorMsg").text("Wrong password")
+                        break;
+                    default: //server error
+                        error()
+                        break;
+                }
+            }
+            function resetloginform() {
+                $("#email_input").val("");
+                $("#password_input").val("");
+                $("#loginErrorMsg").text("");
+            }
+
+            function GetLoginInfo(){
+                let login = {
+                    Email: $("#email_input").val(),
+                    Password: $("#password_input").val()
+                };
+                console.log(login);
+                console.log(JSON.stringify(login));
+                return login;
+            }
+            
+            //UI
 
             function init_UI() {
                 $("#newImageCmd").click(newImage)
@@ -360,6 +423,28 @@
                             holdCheckETag = false;
                             imageIdToDelete = 0;
                             $(this).dialog("close");
+                        }
+                    }]
+                });
+                
+                $("#loginCmd").click(openLogin)
+
+                $("#loginDlg").dialog({
+                    title: "Se connecter",
+                    autoOpen: false,
+                    modal: true,
+                    show: { effect: 'fade', speed: 400 },
+                    hide: { effect: 'fade', speed: 400 },
+                    width: 500,
+                    height: "auto",
+                    position: { my: "top", at: "top", of: window },
+                    buttons: [{
+                        id: "loginOkBtn",
+                        text: "Connecter",
+                        click: function () {
+                            holdCheckETag = false;
+                            loginInfo = GetLoginInfo();
+                            LOGIN(loginInfo, loginSuccess, loginErrorHandler);
                         }
                     }]
                 });
