@@ -13,22 +13,37 @@ body {
 }
 
 .headerPanel {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
     background-image: linear-gradient(180deg, lightgray, gray);
     align-items: center;
+    grid-template-areas: 
+    "header . cmd";
+    grid-template-columns: 10vw 80vw 10vw;
+
 }
 .headerLayout {
     display: grid;
     grid-template-columns: 80px auto 60px;
     align-items: center;
+    grid-area: header;
 }
-.login-cmd{
+.account-cmd{
     position: absolute;
-    width: 120px;
-    right: 20px;
+    width: 180px;
     display: grid;
-    grid-template-columns: 60px 60px;
+    grid-template-columns: 160px 60px 60px;
+    align-items: center;
+    grid-area: cmd;
+}
+#accountAvatar{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.avatarImg{
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
 }
 .outLinedText {
     font-size: 30px !important;

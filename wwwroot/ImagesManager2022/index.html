@@ -59,11 +59,34 @@
                     <span class="cmd fa fa-plus-square" id="newImageCmd" title="Ajouter un image"
                         data-toggle="tooltip"></span>
                 </div>
-                <div class="login-cmd">
-                    <span class="cmd fa fa-sign-in" id="loginCmd" title="Se connecter"
-                    data-toggle="tooltip"></span>
-                    <span class="cmd fa fa-user-plus" id="signupCmd" title="S'enregistrer"
-                    data-toggle="tooltip"></span>
+                <div id="accountOptions" class="account-cmd">
+                    <div id="accountAvatar">
+                        <img id="accountImg" class="loggedIn avatarImg" src="images/No_Avatar.png" style="display: none;"><img>
+                        <span id="accountName" class="loggedIn">
+                            No-nameaaaaaaaaaaaaaaaaaaaa
+                        </span>
+                    </div>
+                    <div>
+                        <!-- Logged Out -->
+                        <span class="cmd fa fa-sign-in loggedOut" id="loginCmd" title="Se connecter"
+                        data-toggle="tooltip"></span>
+
+                        <!-- Logged In -->
+                        <span class="cmd fa fa-id-card loggedIn" id="modifyAccountCmd" title="Modifier son profil"
+                        data-toggle="tooltip"></span>
+
+                    </div>
+                    <div>
+                        <!-- Logged Out -->
+                        <span class="cmd fa fa-user-plus loggedOut" id="registerCmd" title="S'enregistrer"
+                        data-toggle="tooltip"></span>
+
+                        <!-- Logged In -->
+                        <span class="cmd fa fa-sign-out loggedIn" id="disconnectCmd" title="Se déconnecter"
+                        data-toggle="tooltip"></span>
+                    </div>
+
+
                 </div>
             </div>
 
@@ -92,22 +115,60 @@
                         <div class="note">Cliquez-Déposez une image</div>
                     </form>
                 </div>
+
                 <div id="confirmDeleteDlg">
                     <span id="confirmationMessage"></span>
                 </div>
+
                 <div id="errorDlg">
                     <span id="errorMessage"></span>
                 </div>
+
                 <div id="loginDlg">
                     <form id="loginForm">
-                        <label for="email_input">Email</label>
-                        <input type="text" id="email_input" class="form-control" required>
+                        <label for="loginEmail_input">Email</label>
+                        <input type="text" id="loginEmail_input" class="form-control" required>
 
-                        <label for="password_input">Mot de passe</label>
-                        <input type="password" id="password_input" class="form-control" required>
-
-                        <span id="loginErrorMsg" style="color: red;"></span>
+                        <label for="loginPassword_input">Mot de passe</label>
+                        <input type="password" id="loginPassword_input" class="form-control" required>
                     </form>
+                </div>
+                
+                <div id="accountDlg">
+                    <form id="accountForm">
+                        <input type="hidden" id="accountId_input" value="0">
+
+                        <label for="accountUser_input">Nom d'usager</label>
+                        <input type="text" id="accountUser_input" class="form-control" required>
+
+                        <label for="accountEmail_input">Courriel</label>
+                        <input type="text" id="accountEmail_input" class="form-control Email" required>
+
+                        <label for="accountPassword_input">Mot de passe</label>
+                        <input type="password" id="accountPassword_input" class="form-control MatchedPassword" matchedPasswordId="accountConfirmation_input" required>
+
+                        <label for="accountConfirmation_input">Confirmation</label>
+                        <input type="password" id="accountConfirmation_input" class="form-control" required>
+
+                        <label for="accountAvatar">Avatar</label>
+                        <div id='accountAvatar' class='ImageUploader' defaultImage='images/No_Image.png'
+                            waitingImage='images/writing.gif'>
+                        </div>
+                        <div class="note">Cliquez-Déposez votre avatar</div>
+                    </form>
+                </div>
+
+                <div id="verificationDlg">
+                    <form id="verificationForm">
+                        <p>Consultez votre boîte de courriel pour connaître votre code et inscrivez-le ci-dessous</p>
+                        <input type="hidden" id="verificationId_input" value="0">
+                        <label for="verificationCode_input">Code vérification</label>
+                        <input type="text" id="verificationCode_input" class="form-control" required>
+                    </form>
+                </div>
+
+                <div id="verificationSuccessDlg">
+                    <p>Votre compte est désormait vérifié.</p>
                 </div>
             </div>
         </div>
@@ -242,7 +303,7 @@
             function newImage() {
                 holdCheckETag = true;
                 createMode = true;
-                resetimageForm();
+                // resetimageForm();
                 ImageUploader.imageRequired('image', true);
                 $("#imageDlg").dialog('option', 'title', "Ajout d'image");
                 $("#imageDlgOkBtn").text("Ajouter");
@@ -273,14 +334,14 @@
                 $("#confirmDeleteDlgOkBtn").text("Effacer");
                 $("#confirmDeleteDlg").dialog('open');
             }
-            function resetimageForm() {
-                $("#Id_input").val("0");
-                $("#GUID_input").val("");
-                $("#date_input").val(Date.now());
-                $("#title_input").val("");
-                $("#description_input").val("");
-                ImageUploader.resetImage('image');
-            }
+            // function resetimageForm() {
+            //     $("#Id_input").val("0");
+            //     $("#GUID_input").val("");
+            //     $("#date_input").val(Date.now());
+            //     $("#title_input").val("");
+            //     $("#description_input").val("");
+            //     ImageUploader.resetImage('image');
+            // }
             function imageFromForm() {
                 if ($("#imageForm")[0].checkValidity()) {
                     let image = {
@@ -311,49 +372,157 @@
 
             function openLogin() {
                 holdCheckETag = true;
-                resetloginform();
                 $("#loginDlg").dialog('open');
             }
 
             function loginSuccess(){
-
+                console.log("logged in");
             }
             
             function loginErrorHandler(errorCode){
+                let errorMessage = null;
                 switch(errorCode){
                     case 480: //unverified 
-                        $("#loginErrorMsg").text("Unverified user")
+                        errorMessage = "Unverified";
                         break;
                     case 481: //user not found
-                        $("#loginErrorMsg").text("No user with the following email")
+                        errorMessage = "No user with the following email";
                         break;
                     case 482: //wrong password
-                        $("#loginErrorMsg").text("Wrong password")
+                        errorMessage = "Wrong password";
                         break;
-                    default: //server error
-                        error()
+                    default:
+                        error(errorCode);
                         break;
                 }
+
+                if(errorMessage != null){
+                    $("#errorMessage").text(errorMessage);
+                    $("#errorDlg").dialog('open');
+                }
             }
-            function resetloginform() {
-                $("#email_input").val("");
-                $("#password_input").val("");
-                $("#loginErrorMsg").text("");
-            }
+
+            // function resetloginform() {
+            //     $("#loginEmail_input").val("");
+            //     $("#loginPassword_input").val("");
+            //     $("#loginErrorMsg").text("");
+            // }
 
             function GetLoginInfo(){
                 let login = {
-                    Email: $("#email_input").val(),
-                    Password: $("#password_input").val()
+                    Email: $("#loginEmail_input").val(),
+                    Password: $("#loginPassword_input").val()
                 };
-                console.log(login);
-                console.log(JSON.stringify(login));
                 return login;
             }
-            
-            //UI
 
+            function loginUser(userId){
+                console.log("Login");
+            }
+
+            //Account
+            function accountFromForm() {
+                if ($("#accountForm")[0].checkValidity()) {
+                    let account = {
+                        Id: 0,
+                        Name: $("#accountUser_input").val(),
+                        Email:$("#accountEmail_input").val(),
+                        Password:$("#accountPassword_input").val(),
+                        ImageData: ImageUploader.getImageData('accountAvatar')
+                    };
+                    return account;
+                } else {
+                    $("#accountForm")[0].reportValidity()
+                }
+                return false;
+            }
+
+            //Modify Account
+            function openAccountModification(){
+
+            }
+
+            //Register
+            function openRegister() {
+                holdCheckETag = true;
+                $("#accountDlg").dialog('open');
+            }
+
+            function registerError(errorCode){
+                let errorMessage = null;
+                switch(errorCode){
+                    case 409:
+                        errorMessage = "Cet email est déjà utilisé."
+                        break;
+                    default:
+                        error(errorCode);
+                        break;
+                }
+
+                if(errorMessage != null){
+                    $("#errorMessage").text(errorMessage);
+                    $("#errorDlg").dialog('open');
+                }
+            }
+
+            //Verification
+            function openVerficiation(user){
+                console.log(user);
+                $("#verificationId_input").val(user.Id);
+                $("#verificationDlg").dialog('open');
+            }
+
+            function verifyFromForm(){
+                let verification = {
+                    Id : $("#verificationId_input").val(),
+                    Code : $("#verificationCode_input").val()
+                }
+
+                return verification;
+            }
+
+            function verificationSuccess(){
+                $("[id$='Dlg']").dialog('close');
+                $("#verificationSuccessDlg").dialog('open');
+            }
+
+            function verificationErrorHandler(errorCode){
+                let errorMessage = null;
+                switch(errorCode){
+                    case 480:
+                        errorMessage = "Le code entré est incorrect";
+                        break;
+                    default:
+                        error(errorCode);
+                        break;
+                }
+
+                if(errorMessage != null){
+                    $("#errorMessage").text(errorMessage);
+                    $("#errorDlg").dialog('open');
+                }
+            }
+
+            //UI
+            function resetDialogsOnClose(){
+                $("[id$='Dlg']").dialog({
+                    close : function(e){
+                        let targetId = $(e.target).attr("id");
+
+                        $(`#${targetId} form`).each((i, element) => {                                     
+                            element.reset();
+                        });
+
+                        $(`#${targetId} .ImageUploader`).each((i, element) => {                                     
+                            ImageUploader.resetImage($(element).attr("id"));
+                        })
+                    }
+                });
+            }
             function init_UI() {
+                $(".loggedOut").hide();
+                $(".loggedIn").show();
+
                 $("#newImageCmd").click(newImage)
 
                 $("#imageDlg").dialog({
@@ -381,7 +550,7 @@
                                 }
                                 else
                                     PUT(image, getImagesList, error);
-                                resetimageForm();
+                                // resetimageForm();
                                 holdCheckETag = false;
                                 $(this).dialog("close");
                             }
@@ -444,9 +613,102 @@
                             holdCheckETag = false;
                             loginInfo = GetLoginInfo();
                             LOGIN(loginInfo, loginSuccess, loginErrorHandler);
+                        },
+
+                    },
+                    {
+                        text: "Annuler",
+                        click: function () {
+                            holdCheckETag = false;
+                            $(this).dialog("close");
                         }
                     }]
                 });
+
+                $("#registerCmd").click(openRegister);
+
+                $("#accountDlg").dialog({
+                    title: "Création de compte",
+                    autoOpen: false,
+                    modal: true,
+                    show: { effect: 'fade', speed: 400 },
+                    hide: { effect: 'fade', speed: 400 },
+                    width: 640,
+                    minWidth: 640,
+                    maxWidth: 640,
+                    height: "auto",
+                    position: { my: "top", at: "top", of: window },
+                    buttons: [{
+                        id: "registerBtn",
+                        text: "Créer",
+                        click: function () {
+                            holdCheckETag = false;
+                            let account = accountFromForm();
+                            if(account){
+                                REGISTER(account, openVerficiation, registerError)
+                            }
+                        }
+                    },
+                    {
+                        text: "Annuler",
+                        click: function () {
+                            holdCheckETag = false;
+                            $(this).dialog("close");
+                        }
+                    }]
+                });
+
+                
+                $("#verificationDlg").dialog({
+                    title: "Vérification",
+                    autoOpen: false,
+                    modal: true,
+                    show: { effect: 'fade', speed: 400 },
+                    hide: { effect: 'fade', speed: 400 },
+                    width: 640,
+                    minWidth: 640,
+                    maxWidth: 640,
+                    height: "auto",
+                    position: { my: "top", at: "top", of: window },
+                    buttons: [{
+                        id: "verifyBtn",
+                        text: "Vérifier",
+                        click: function () {
+                            holdCheckETag = false;
+                            let verification = verifyFromForm();
+                            VERIFY(verification, verificationSuccess, error);
+                        }
+                    },
+                    {
+                        text: "Annuler",
+                        click: function () {
+                            holdCheckETag = false;
+                            $(this).dialog("close");
+                        }
+                    }]
+                });
+
+                $("#verificationSuccessDlg").dialog({
+                    title: "Vérification réussie",
+                    autoOpen: false,
+                    modal: true,
+                    show: { effect: 'fade', speed: 400 },
+                    hide: { effect: 'fade', speed: 400 },
+                    width: 640,
+                    minWidth: 640,
+                    maxWidth: 640,
+                    height: "auto",
+                    position: { my: "top", at: "top", of: window },
+                    buttons: [{
+                        id: "verificationSuccessOkBtn",
+                        text: "Ok",
+                        click: function () {
+                            holdCheckETag = false;
+                            $(this).dialog("close");
+                        }
+                    }]
+                });
+                
 
                 $("#errorDlg").dialog({
                     title: "Erreur...",
@@ -466,6 +728,8 @@
                         }
                     }]
                 });
+
+                resetDialogsOnClose();
 
                 $(".scrollContainer").scroll(function () {
                     if ($(".scrollContainer").scrollTop() + $(".scrollContainer").innerHeight() >= $("#imagesList").height()) {
