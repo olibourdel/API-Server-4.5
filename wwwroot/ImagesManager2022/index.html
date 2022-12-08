@@ -60,11 +60,13 @@
                         data-toggle="tooltip"></span>
                 </div>
                 <div id="accountOptions" class="account-cmd">
+                    <!-- Logged In -->
                     <div id="accountAvatar">
                         <img id="accountImg" class="loggedIn avatarImg" src="images/No_Avatar.png" style="display: none;"><img>
-                        <span id="accountName" class="loggedIn">
-                            No-nameaaaaaaaaaaaaaaaaaaaa
-                        </span>
+                    </div>
+                    <!-- Logged In -->
+                    <div id="accountName" class="loggedIn">
+                        No-name
                     </div>
                     <div>
                         <!-- Logged Out -->
@@ -131,6 +133,9 @@
 
                         <label for="loginPassword_input">Mot de passe</label>
                         <input type="password" id="loginPassword_input" class="form-control" required>
+
+                        <input type="checkbox" id="loginRememberMe_input">
+                        <label for="loginRememberMe_input">Se souvenir de moi</label>
                     </form>
                 </div>
                 
@@ -141,7 +146,7 @@
                         <label for="accountUser_input">Nom d'usager</label>
                         <input type="text" id="accountUser_input" class="form-control" required>
 
-                        <label for="accountEmail_input">Courriel</label>
+                        <label for="accountEmail_input">Courriel <span id="accountEmailUnverifiedNotice" style="color: red;">(Non vérifié)</span></label>
                         <input type="text" id="accountEmail_input" class="form-control Email" required>
 
                         <label for="accountPassword_input">Mot de passe</label>
@@ -150,8 +155,8 @@
                         <label for="accountConfirmation_input">Confirmation</label>
                         <input type="password" id="accountConfirmation_input" class="form-control" required>
 
-                        <label for="accountAvatar">Avatar</label>
-                        <div id='accountAvatar' class='ImageUploader' defaultImage='images/No_Image.png'
+                        <label for="accountAvatarInput">Avatar</label>
+                        <div id='accountAvatarInput' class='ImageUploader' defaultImage='images/No_Image.png'
                             waitingImage='images/writing.gif'>
                         </div>
                         <div class="note">Cliquez-Déposez votre avatar</div>
@@ -167,8 +172,8 @@
                     </form>
                 </div>
 
-                <div id="verificationSuccessDlg">
-                    <p>Votre compte est désormait vérifié.</p>
+                <div id="messageDlg">
+                    <p>Default message</p>
                 </div>
             </div>
         </div>
@@ -185,6 +190,7 @@
             let holdCheckETag = false;
             let currentETag = "";
             let createMode = true;
+            let modifyAccount = true;
             let searchCategory = "";
             let searchTitle = "";
             let hideSearchBar = true;
@@ -194,6 +200,7 @@
             let appendCount = 3;
             let previousScrollPosition = 0;
             let appendMode = false;
+            let currentToken;
 
             init_UI();
             HEAD(checkETag, error);
@@ -352,6 +359,7 @@
                         ImageData: ImageUploader.getImageData('image'),
                         Date: parseInt($("#date_input").val())
                     };
+                    console.log(image);
                     return image;
                 } else {
                     $("#imageForm")[0].reportValidity()
@@ -409,27 +417,49 @@
             // }
 
             function GetLoginInfo(){
-                let login = {
+                let loginCredentials = {
                     Email: $("#loginEmail_input").val(),
                     Password: $("#loginPassword_input").val()
                 };
-                return login;
+
+                let loginInfo = {
+                    "loginCredentials" : loginCredentials,
+                    "remember" : $("#loginRememberMe_input").prop('checked')
+                }
+
+                return loginInfo;
             }
 
-            function loginUser(userId){
-                console.log("Login");
+            function loginUser(user){
+                console.log(user);
+
+                setAccountUI(user);
+
+                $(".loggedOut").hide();
+                $(".loggedIn").show();
+
+            }
+
+            function logoutAccount(){
+                currentToken = undefined;
+                localStorage.removeItem("token");
+
+                $(".loggedIn").hide();
+                $('.loggedOut').show();
             }
 
             //Account
             function accountFromForm() {
                 if ($("#accountForm")[0].checkValidity()) {
+
                     let account = {
-                        Id: 0,
+                        Id: parseInt($("#accountId_input").val()),
                         Name: $("#accountUser_input").val(),
                         Email:$("#accountEmail_input").val(),
                         Password:$("#accountPassword_input").val(),
-                        ImageData: ImageUploader.getImageData('accountAvatar')
+                        ImageData: ImageUploader.getImageData('accountAvatarInput')
                     };
+
                     return account;
                 } else {
                     $("#accountForm")[0].reportValidity()
@@ -437,14 +467,62 @@
                 return false;
             }
 
-            //Modify Account
-            function openAccountModification(){
+            function accountToForm(user){
+                $("#accountId_input").val(user.Id)
+                $("#accountUser_input").val(user.Name)
+                $("#accountEmail_input").val(user.Email)
 
+                if(user.VerifyCode == "unverified"){
+                    $("#accountEmailUnverifiedNotice").show();
+                }else{
+                    $("#accountEmailUnverifiedNotice").hide();
+                }
+
+                // $("accountPassword_input")
+                // $("accountConfirmation_input")
+                ImageUploader.setImage('accountAvatarInput', user.AvatarURL);
+            }
+
+            //Modify Account
+            function openAccountModification(user){
+                holdCheckETag = true;
+
+                $("#accountDlg").dialog('option', 'title', "Modifier son compte");
+                $("#accountOkBtn").text("Modifier");
+
+                $("#accountPassword_input").prop("required", false);
+                $("#accountConfirmation_input").prop("required", false);
+
+                accountToForm(user);
+
+                modifyAccount = true;
+                $("#accountDeleteBtn").show();
+
+             
+                $("#accountDlg").dialog('open');
+            }
+
+            function modificationSuccess(user){
+                displayMessageDialog("Modification réussi", "Vos informations ont été changées");
+
+                GET_USER(currentToken.UserId,setAccountUI, error);
             }
 
             //Register
             function openRegister() {
                 holdCheckETag = true;
+
+                $("#accountDlg").dialog('option', 'title', "Création de compte");
+                $("#accountOkBtn").text("Créer");
+
+                $("#accountPassword_input").prop("required", true);
+                $("#accountConfirmation_input").prop("required", true);
+
+                $("#accountId_input").val(0);
+
+                modifyAccount = false;
+                $("#accountDeleteBtn").hide();
+
                 $("#accountDlg").dialog('open');
             }
 
@@ -482,8 +560,8 @@
             }
 
             function verificationSuccess(){
-                $("[id$='Dlg']").dialog('close');
-                $("#verificationSuccessDlg").dialog('open');
+                closeAllDialogs();
+                displayMessageDialog("Vérification réussie", "Votre compte est désormais vérifié");
             }
 
             function verificationErrorHandler(errorCode){
@@ -519,9 +597,28 @@
                     }
                 });
             }
+
+            function setAccountUI(user){
+                $("#accountImg").attr("src", user.AvatarURL);
+                $("#accountName").html(user.Name);
+            }
+
+            function closeAllDialogs(){
+                $("[id$='Dlg']").dialog('close');
+            }
+
+            function displayMessageDialog(title, message){
+                $("#messageDlg").dialog('option', 'title', title);
+                $("#messageDlg").html(`<p>${message}</p>`);
+                $("#messageDlg").dialog('open');
+            }
+
             function init_UI() {
-                $(".loggedOut").hide();
-                $(".loggedIn").show();
+                if(localStorage.token){
+                    currentToken = JSON.parse(localStorage.token);
+                    console.log(currentToken);
+                    GET_USER(currentToken.UserId, loginUser, error);
+                }
 
                 $("#newImageCmd").click(newImage)
 
@@ -612,7 +709,19 @@
                         click: function () {
                             holdCheckETag = false;
                             loginInfo = GetLoginInfo();
-                            LOGIN(loginInfo, loginSuccess, loginErrorHandler);
+                            console.log(loginInfo);
+
+                            LOGIN(loginInfo.loginCredentials, (userToken) => { 
+                                currentToken = userToken;
+                                if(loginInfo.remember){
+                                    localStorage.token = JSON.stringify(currentToken);
+                                }else{
+                                    localStorage.removeItem("token");
+                                }
+                                GET_USER(userToken.UserId,loginUser,error); 
+                                $(this).dialog("close");
+                            }, 
+                            loginErrorHandler);
                         },
 
                     },
@@ -626,6 +735,7 @@
                 });
 
                 $("#registerCmd").click(openRegister);
+                $("#modifyAccountCmd").click(function(){ GET_USER(currentToken.UserId, openAccountModification, error) });
 
                 $("#accountDlg").dialog({
                     title: "Création de compte",
@@ -639,13 +749,33 @@
                     height: "auto",
                     position: { my: "top", at: "top", of: window },
                     buttons: [{
-                        id: "registerBtn",
+                        id: "accountDeleteBtn",
                         text: "Créer",
                         click: function () {
                             holdCheckETag = false;
                             let account = accountFromForm();
                             if(account){
                                 REGISTER(account, openVerficiation, registerError)
+                            }
+                        }
+                    },
+                    {
+                        id: "accountOkBtn",
+                        text: "Créer",
+                        click: function () {
+                            holdCheckETag = false;
+                            let account = accountFromForm();
+                            if(account){
+                                if(modifyAccount){
+                                    let modificationInfo = {
+                                        "token" : currentToken,
+                                        "account" : account
+                                    };
+
+                                    MODIFY(modificationInfo,modificationSuccess, error);
+                                }else{
+                                    REGISTER(account, openVerficiation, registerError);
+                                }
                             }
                         }
                     },
@@ -688,8 +818,8 @@
                     }]
                 });
 
-                $("#verificationSuccessDlg").dialog({
-                    title: "Vérification réussie",
+                $("#messageDlg").dialog({
+                    title: "Message",
                     autoOpen: false,
                     modal: true,
                     show: { effect: 'fade', speed: 400 },
@@ -700,7 +830,7 @@
                     height: "auto",
                     position: { my: "top", at: "top", of: window },
                     buttons: [{
-                        id: "verificationSuccessOkBtn",
+                        id: "messageOkBtn",
                         text: "Ok",
                         click: function () {
                             holdCheckETag = false;
@@ -708,6 +838,10 @@
                         }
                     }]
                 });
+
+                $("#disconnectCmd").click(function(){
+                    LOGOUT(currentToken.UserId, _ => logoutAccount(), error);
+                })
                 
 
                 $("#errorDlg").dialog({

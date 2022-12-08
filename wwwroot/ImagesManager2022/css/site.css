@@ -13,30 +13,27 @@ body {
 }
 
 .headerPanel {
-    display: grid;
+    display: flex;
     background-image: linear-gradient(180deg, lightgray, gray);
     align-items: center;
-    grid-template-areas: 
-    "header . cmd";
-    grid-template-columns: 10vw 80vw 10vw;
-
+    flex-direction: row;
 }
 .headerLayout {
     display: grid;
     grid-template-columns: 80px auto 60px;
     align-items: center;
-    grid-area: header;
+    align-self: flex-start;
 }
 .account-cmd{
-    position: absolute;
-    width: 180px;
     display: grid;
-    grid-template-columns: 160px 60px 60px;
+    grid-template-columns: repeat(4,auto);
+    gap:20px;
     align-items: center;
-    grid-area: cmd;
+    margin-left: auto;
+    margin-right: 20px;
 }
 #accountAvatar{
-    display: flex;
+    display: grid;
     align-items: center;
     gap: 5px;
 }
@@ -44,6 +41,9 @@ body {
     height: 50px;
     width: 50px;
     border-radius: 50%;
+}
+.loggedIn{
+    display: none;
 }
 .outLinedText {
     font-size: 30px !important;
