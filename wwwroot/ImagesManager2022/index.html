@@ -1113,7 +1113,7 @@
                         click: function () {
                             holdCheckETag = false;
                             let verification = verifyFromForm();
-                            VERIFY(verification, verificationSuccess, error);
+                            VERIFY(verification, verificationSuccess, verificationErrorHandler);
                         }
                     },
                     {
