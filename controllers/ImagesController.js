@@ -21,7 +21,7 @@ module.exports =
                 if(user.UserId == data.UserId){
                     super.post(data);
                 }else{
-                    this.HttpContext.response.unauthorized();
+                    this.HttpContext.response.unAuthorized();
                 }
             }
         }
@@ -31,7 +31,7 @@ module.exports =
                 if(user.UserId == data.UserId){
                     super.put(data);
                 }else{
-                    this.HttpContext.response.unauthorized();
+                    this.HttpContext.response.unAuthorized();
                 }
             }
         }
