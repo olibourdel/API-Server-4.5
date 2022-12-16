@@ -257,7 +257,7 @@
             init_UI();
             HEAD(checkETag, error);
             setInterval(() => { HEAD(checkETag, error) }, periodicRefreshPeriod * 1000);
-            setInterval(() => { initUserSelectList() }, periodicRefreshPeriod * 1000);
+            setInterval(() => { refreshUserSelectList() }, periodicRefreshPeriod * 1000);
 
             function checkETag(ETag) {
                 if (!holdCheckETag && ETag != currentETag) {
@@ -770,8 +770,21 @@
                 },error);
             }
 
-            function addUserSelectOption(user){
-                $("#userFilter_input").append(`<option value="${user.Id}">${user.Name}</option>`);
+            function refreshUserSelectList(){
+                let value = $("#userFilter_input").val();
+              console.log(value);
+                $("#userFilter_input").html('<option value="all">Tous les usagers</option>');
+                GET_USERID_WITH_IMAGES(function(userIds){
+                    for(let userId of userIds){
+                        GET_USER(userId.UserId,(user) => { addUserSelectOption(user, userId.UserId == value) },error);
+                    }
+                },error);
+            }
+
+            function addUserSelectOption(user,selected){
+                let option = $(`<option value="${user.Id}">${user.Name}</option>`);
+                $(option).prop("selected",selected);
+                $("#userFilter_input").append(option);
             }
 
             function toggleImageOrder(){
