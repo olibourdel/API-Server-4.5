@@ -237,6 +237,7 @@
             const periodicRefreshPeriod = 15;
             let holdCheckETag = false;
             let currentETag = "";
+            let currentAccountETag = "";
             let createMode = true;
             let modifyAccount = true;
             let searchCategory = "";
@@ -256,13 +257,21 @@
 
             init_UI();
             HEAD(checkETag, error);
+            ACCOUNT_HEAD(checkUserList, error);
             setInterval(() => { HEAD(checkETag, error) }, periodicRefreshPeriod * 1000);
-            setInterval(() => { refreshUserSelectList() }, periodicRefreshPeriod * 1000);
+            setInterval(() => { ACCOUNT_HEAD(checkUserList,error) }, periodicRefreshPeriod * 1000);
 
             function checkETag(ETag) {
                 if (!holdCheckETag && ETag != currentETag) {
                     currentETag = ETag;
                     getImagesList();
+                }
+            }
+
+            function checkUserList(ETag){
+                if(!holdCheckETag && ETag != currentAccountETag){
+                    currentAccountETag = ETag;
+                    refreshUserSelectList();
                 }
             }
 
@@ -377,6 +386,9 @@
                         break;
                     case 409:
                         errorMessage = "Conflits de données: Hyperlien existe déjà";
+                        break;
+                    case 480:
+                        errorMessage = "Cette action requiert un compte validé";
                         break;
                     case 500:
                         errorMessage = "Erreur interne du service";
@@ -615,7 +627,6 @@
             }
 
             function checkEmailChange(user){
-                console.log(user);
                 return user.VerifyCode != "verified";
             }
 
@@ -761,14 +772,14 @@
                 return query;
             }
 
-            function initUserSelectList(){
-                $("#userFilter_input").html('<option value="all" selected>Tous les usagers</option>');
-                GET_USERID_WITH_IMAGES(function(userIds){
-                    for(let userId of userIds){
-                        GET_USER(userId.UserId,addUserSelectOption,error);
-                    }
-                },error);
-            }
+            // function initUserSelectList(){
+            //     $("#userFilter_input").html('<option value="all" selected>Tous les usagers</option>');
+            //     GET_USERID_WITH_IMAGES(function(userIds){
+            //         for(let userId of userIds){
+            //             GET_USER(userId.UserId,addUserSelectOption,error);
+            //         }
+            //     },error);
+            // }
 
             function refreshUserSelectList(){
                 let value = $("#userFilter_input").val();
@@ -854,7 +865,7 @@
                     logoutAccount();
                 }
 
-                initUserSelectList();
+                // initUserSelectList();
 
                 $("#searchMenuCmd").click(toggleSearchMenu);
                 $("#searchCmd").click(searchImages);

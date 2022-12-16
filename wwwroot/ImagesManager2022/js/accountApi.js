@@ -1,8 +1,20 @@
-const apiAccountBaseURL = "http://localhost:5000/accounts";
+const accountBaseURL = "http://localhost:5000/accounts";
+const accountApiBaseURL = "http://localhost:5000/api/accounts";
+const tokenURL = "http://localhost:5000/token"; 
+
+function ACCOUNT_HEAD(successCallBack, errorCallBack) {
+    $.ajax({
+        url: accountApiBaseURL,
+        type: 'HEAD',
+        contentType: 'text/plain',
+        complete: request => { successCallBack(request.getResponseHeader('ETag')) },
+        error: function (jqXHR) { errorCallBack(jqXHR.status) }
+    });
+}
 
 function LOGIN(data, successCallBack, errorCallBack){
     $.ajax({
-        url: "http://localhost:5000/token",
+        url: tokenURL,
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -13,7 +25,7 @@ function LOGIN(data, successCallBack, errorCallBack){
 
 function REGISTER(data, successCallBack, errorCallBack){
     $.ajax({
-        url: apiAccountBaseURL + '/register',
+        url: accountBaseURL + '/register',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -24,7 +36,7 @@ function REGISTER(data, successCallBack, errorCallBack){
 
 function VERIFY(data, successCallBack, errorCallBack){
     $.ajax({
-        url: apiAccountBaseURL + `/verify?id=${data.Id}&code=${data.Code}`,
+        url: accountBaseURL + `/verify?id=${data.Id}&code=${data.Code}`,
         type: 'GET',
         success: (data) => { successCallBack(data) },
         error: function (jqXHR) { errorCallBack(jqXHR.status) }
@@ -33,7 +45,7 @@ function VERIFY(data, successCallBack, errorCallBack){
 
 function LOGOUT(userId, successCallBack, errorCallBack){
     $.ajax({
-        url: apiAccountBaseURL + `/logout/${userId}`,
+        url: accountBaseURL + `/logout/${userId}`,
         type: 'GET',
         success: (data) => { successCallBack(data) },
         error: function (jqXHR) { errorCallBack(jqXHR.status) }
@@ -42,7 +54,7 @@ function LOGOUT(userId, successCallBack, errorCallBack){
 
 function GET_USER(id, successCallback, errorCallback){
     $.ajax({
-        url: apiAccountBaseURL + `/index/${id}`,
+        url: accountBaseURL + `/index/${id}`,
         type: 'GET',
         success: (data) => { successCallback(data) },
         error: function (jqXHR) { errorCallback(jqXHR.status) }
@@ -51,7 +63,7 @@ function GET_USER(id, successCallback, errorCallback){
 
 function MODIFY(modificationInfo, successCallback, errorCallback){
     $.ajax({
-        url: apiAccountBaseURL + `/modify`,
+        url: accountBaseURL + `/modify`,
         type: 'PUT',
         contentType: 'application/json',
         data: JSON.stringify(modificationInfo.account),
@@ -65,7 +77,7 @@ function MODIFY(modificationInfo, successCallback, errorCallback){
 
 function REMOVE(deleteInfo, successCallback, errorCallback){
     $.ajax({
-        url: apiAccountBaseURL + `/remove/${deleteInfo.userId}`,
+        url: accountBaseURL + `/remove/${deleteInfo.userId}`,
         type: 'GET',
         headers:{
             authorization : deleteInfo.token.Access_token
