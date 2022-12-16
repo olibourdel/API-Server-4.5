@@ -403,6 +403,7 @@
                 createMode = false;
                 GET_ID(e.target.getAttribute("imageid"), imageToForm, error);
                 ImageUploader.imageRequired('image', false);
+                $("#Id_input").val(0);
                 $("#imageDlg").dialog('option', 'title', "Modification d'image");
                 $("#imageDlgOkBtn").text("Modifier");
                 $("#imageDlg").dialog('open');
