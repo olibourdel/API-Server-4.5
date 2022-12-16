@@ -762,7 +762,7 @@
             }
 
             function initUserSelectList(){
-                $("#userFilter_input").empty();
+                $("#userFilter_input").html('<option value="all" selected>Tous les usagers</option>');
                 GET_USERID_WITH_IMAGES(function(userIds){
                     for(let userId of userIds){
                         GET_USER(userId.UserId,addUserSelectOption,error);
