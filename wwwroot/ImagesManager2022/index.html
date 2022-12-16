@@ -257,6 +257,7 @@
             init_UI();
             HEAD(checkETag, error);
             setInterval(() => { HEAD(checkETag, error) }, periodicRefreshPeriod * 1000);
+            setInterval(() => { initUserSelectList() }, periodicRefreshPeriod * 1000);
 
             function checkETag(ETag) {
                 if (!holdCheckETag && ETag != currentETag) {
@@ -671,10 +672,6 @@
 
             function verificationSuccess(){
                 closeAllDialogs();
-                if(currentToken == null){
-                    $("#loginDlg").dialog('open');
-                }
-
                 displayMessageDialog("Vérification réussie", "Votre compte est désormais vérifié");
             }
 
@@ -703,6 +700,8 @@
                 localStorage.removeItem("token");
 
                 getImagesList();
+                initUserSelectList();
+
                 displayMessageDialog("Suppression du compte réussie","Votre compte a été supprimé");
             }
 
@@ -968,7 +967,6 @@
 
                             LOGIN(loginInfo, (userToken) => { 
                                 currentToken = userToken;
-                                console.log(loginInfo);
                                 if(loginInfo.Remember){
                                     localStorage.token = JSON.stringify(currentToken);
                                 }else{
@@ -1026,7 +1024,18 @@
 
                                     MODIFY(modificationInfo,modificationSuccess, error);
                                 }else{
-                                    REGISTER(account, openVerficiation, registerError);
+                                    REGISTER(account, function(){
+                                        let loginInfo = {
+                                            Email: account.Email,
+                                            Password: account.Password,
+                                            Remember: false
+                                        }
+                                        LOGIN(loginInfo, function(userToken){
+                                            currentToken = userToken;
+                                            GET_USER(userToken.UserId,loginUser,error);
+                                            openVerficiation({ Id : userToken.UserId });
+                                        },loginErrorHandler)
+                                    }, registerError);
                                 }
                             }
                         }
