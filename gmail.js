@@ -25,10 +25,12 @@ module.exports =
 
         async send(to, subject, html) {
             let from = GmailAccountEmail;
+            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
             await this.transporter.sendMail({ from, to, subject, html }, function (error, info) {
                 if (error) {
                     console.log(error);
                 } else {
+                    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 1;
                     console.log('Email sent: ' + info.response);
                 }
             })

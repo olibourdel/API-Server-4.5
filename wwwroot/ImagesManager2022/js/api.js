@@ -26,31 +26,49 @@ function GET_ALL(successCallBack, errorCallBack, queryString = null) {
         error: function (jqXHR) { errorCallBack(jqXHR.status) }
     });
 }
-function POST(data, successCallBack, errorCallBack) {
+function POST(createInfo, successCallBack, errorCallBack) {
     $.ajax({
         url: apiBaseURL,
         type: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify(data),
+        data: JSON.stringify(createInfo.image),
+        headers:{
+            authorization : createInfo.token.Access_token
+        },
         success: (data) => { successCallBack(data) },
         error: function (jqXHR) { errorCallBack(jqXHR.status) }
     });
 }
-function PUT(bookmark, successCallBack, errorCallBack) {
+function PUT(modifyInfo, successCallBack, errorCallBack) {
     $.ajax({
-        url: apiBaseURL + "/" + bookmark.Id,
+        url: apiBaseURL + "/" + modifyInfo.image.Id,
         type: 'PUT',
         contentType: 'application/json',
-        data: JSON.stringify(bookmark),
+        data: JSON.stringify(modifyInfo.image),
+        headers:{
+            authorization : modifyInfo.token.Access_token
+        },
         success: () => { successCallBack() },
         error: function (jqXHR) { errorCallBack(jqXHR.status) }
     });
 }
-function DELETE(id, successCallBack, errorCallBack) {
+function DELETE(deleteInfo, successCallBack, errorCallBack) {
     $.ajax({
-        url: apiBaseURL + "/" + id,
+        url: apiBaseURL + "/" + deleteInfo.id,
         type: 'DELETE',
+        headers:{
+            authorization : deleteInfo.token.Access_token
+        },
         success: () => { successCallBack() },
+        error: function (jqXHR) { errorCallBack(jqXHR.status) }
+    });
+}
+
+function GET_USERID_WITH_IMAGES(successCallBack, errorCallBack){
+    $.ajax({
+        url: apiBaseURL + "?fields=UserId",
+        type: 'GET',
+        success: (data) => { successCallBack(data) },
         error: function (jqXHR) { errorCallBack(jqXHR.status) }
     });
 }

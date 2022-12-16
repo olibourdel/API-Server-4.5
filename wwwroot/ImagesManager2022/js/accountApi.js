@@ -50,7 +50,6 @@ function GET_USER(id, successCallback, errorCallback){
 }
 
 function MODIFY(modificationInfo, successCallback, errorCallback){
-    console.log(modificationInfo)
     $.ajax({
         url: apiAccountBaseURL + `/modify`,
         type: 'PUT',
@@ -58,6 +57,18 @@ function MODIFY(modificationInfo, successCallback, errorCallback){
         data: JSON.stringify(modificationInfo.account),
         headers:{
             authorization : modificationInfo.token.Access_token
+        },
+        success: (data) => { successCallback(data) },
+        error: function (jqXHR) { errorCallback(jqXHR.status) }
+    });
+}
+
+function REMOVE(deleteInfo, successCallback, errorCallback){
+    $.ajax({
+        url: apiAccountBaseURL + `/remove/${deleteInfo.userId}`,
+        type: 'GET',
+        headers:{
+            authorization : deleteInfo.token.Access_token
         },
         success: (data) => { successCallback(data) },
         error: function (jqXHR) { errorCallback(jqXHR.status) }

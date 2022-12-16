@@ -8,6 +8,8 @@ class Image extends Model{
         this.Description = "";
         this.Date =  0;
         this.GUID = "";
+        this.UserId = 0;
+        this.Shared = false;
 
         this.addValidator('Title','string');
         this.addValidator('Description', 'string');

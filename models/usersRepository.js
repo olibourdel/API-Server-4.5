@@ -3,7 +3,7 @@ const UserModel = require('./user.js');
 const utilities = require("../utilities");
 const HttpContext = require('../httpContext').get();
 
-module.exports =
+
     class UsersRepository extends require('./repository') {
         constructor() {
             super(new UserModel(), true);
@@ -53,4 +53,10 @@ module.exports =
             }
             return false;
         }
+        isVerified(id){
+            let foundUser = super.get(id);
+            return foundUser.VerifyCode == "verified";
+        }
     }
+
+    module.exports = UsersRepository;

@@ -7,9 +7,13 @@ let repository = new Repository(new Token());
 let tokenLifeDuration = require("./serverVariables").get("main.token.lifeDuration");
 
 class TokenManager {
-    static create(user) {
+    static create(user,remember) {
         let token = new Token().create(user);
-        token.Expire_Time = utilities.nowInSeconds() + tokenLifeDuration;
+        if(!remember){
+            token.Expire_Time = utilities.nowInSeconds() + tokenLifeDuration;
+        }else{
+            token.Expire_Time = 'none';
+        }
         console.log("User " + token.Username + " logged in");
         repository.add(token);
         return token;

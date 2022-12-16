@@ -26,7 +26,7 @@ module.exports =
             let user = this.repository.findByField("Email", loginInfo.Email);
             if (user != null) {
                 if (user.Password == loginInfo.Password) {
-                    let newToken = TokenManager.create(user);
+                    let newToken = TokenManager.create(user,loginInfo.Remember);
                     this.HttpContext.response.JSON(newToken);
                 } else {
                     this.HttpContext.response.wrongPassword();
@@ -131,6 +131,12 @@ module.exports =
         }
         // GET:account/remove/id
         remove(id) { // warning! this is not an API endpoint
+            let imageRepo = new ImagesRepository();
+            let userImages = imageRepo.getAll({UserId:String(id)});
+            for(let image of userImages){
+                imageRepo.remove(image.Id);
+            }
+
             super.remove(id);
         }
     }

@@ -1,5 +1,5 @@
 const utilities = require('../utilities');
-
+const keywordTargets = ["Title","Description"]
 module.exports =
     class collectionFilter {
         constructor(collection, filterParams, model = null) {
@@ -9,6 +9,7 @@ module.exports =
             this.sortFields = [];
             this.searchKeys = [];
             this.fields = [];
+            this.keywords = [];
             this.filteredCollection = [];
             this.limit = 0;
             this.offset = 0;
@@ -22,6 +23,7 @@ module.exports =
                         case "limit": instance.limit = parseInt(paramValue); break;
                         case "offset": instance.offset = parseInt(paramValue); break;
                         case "fields": instance.fields = paramValue.split(','); break;
+                        case "keywords": instance.keywords = paramValue.split(' '); break;
                         default: instance.addSearchKey(paramName, paramValue);
                     }
                 }
@@ -182,8 +184,45 @@ module.exports =
         sort() {
             this.filteredCollection.sort((a, b) => this.compare(a, b));
         }
-        get() {
+        findKeywords(){
+            if(this.keywords.length != 0){
+                let filtered = [];
+                let shouldBeIncluded;
+                let text = "";
 
+                for(let item of this.collection){
+                    text = "";
+                    shouldBeIncluded = true;
+                    for(let keywordTarget of keywordTargets){
+                        if(item[keywordTarget]){
+                            text += `${item[keywordTarget]} `.toLowerCase();
+                        }else{
+                            text = "";
+                            break;
+                        }
+                    }
+
+                    for(let keyword of this.keywords){
+                        if(!text.includes(keyword.toLowerCase())){
+                            shouldBeIncluded = false;
+                            break;
+                        }
+                    }  
+                        
+                    if(shouldBeIncluded){
+                        filtered.push(item);
+                    }
+                }
+    
+                this.collection = filtered;
+    
+                return filtered;
+            }else{
+                return this.collection;
+            }
+        }
+        get() {
+            this.findKeywords();
             this.findByKeys(this.keepFields());
 
             if (this.sortFields.length > 0)
