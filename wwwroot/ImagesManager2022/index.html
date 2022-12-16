@@ -761,6 +761,7 @@
             }
 
             function initUserSelectList(){
+                $("#userFilter_input").empty();
                 GET_USERID_WITH_IMAGES(function(userIds){
                     for(let userId of userIds){
                         GET_USER(userId.UserId,addUserSelectOption,error);
